@@ -88,8 +88,6 @@ def create_slug(name: str) -> str:
 
     Args:
         name: The name to create a slug from.
-        ensure_unique: If True, adds a UUID-based suffix to ensure uniqueness
-                       even for identical titles.
     """
     if not name:
         return ""
@@ -247,6 +245,16 @@ def validate_and_substitute_code(
     return default_code, f"{code} -> {default_code['code']}"
 
 
+# Short prefixes for resource types to keep slugs short
+RESOURCE_TYPE_PREFIXES = {
+    "activity_definition": "ad",
+    "charge_item_definition": "ci",
+    "product_knowledge": "pk",
+    "specimen_definition": "sp",
+    "observation_definition": "ob",
+}
+
+
 def ensure_category(category_name: str, facility, resource_type: str, created_by=None):
     """
     Ensure a ResourceCategory exists for the given name, if not create it.
@@ -257,14 +265,16 @@ def ensure_category(category_name: str, facility, resource_type: str, created_by
 
     try:
         category_title = normalize_title(category_name)
-        category_slug_value = create_slug(category_name)
+        # Use short prefix for resource_type to keep slug within 25 chars
+        prefix = RESOURCE_TYPE_PREFIXES.get(resource_type, resource_type[:2])
+        category_slug_value = create_slug(f"{prefix}-{category_name}")
         category_slug = ResourceCategory.calculate_slug_from_facility(
             str(facility.external_id), category_slug_value
         )
 
         # Check if exists
         category = ResourceCategory.objects.filter(
-            slug=category_slug, facility=facility
+            slug=category_slug, facility=facility, resource_type=resource_type
         ).first()
 
         if category:

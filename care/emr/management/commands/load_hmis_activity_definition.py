@@ -303,13 +303,20 @@ class Command(BaseCommand):
             title = normalize_title(row["title"])
             slug_value = row.get("slug") or create_slug(title)
 
+            # Convert classification to snake_case (e.g., "Surgical Procedures" -> "surgical_procedure")
+            classification_raw = (row.get("classification") or "laboratory").strip()
+            classification = classification_raw.lower().replace(" ", "_")
+            # Remove trailing 's' for singular form (e.g., "surgical_procedures" -> "surgical_procedure")
+            if classification.endswith("s") and len(classification) > 1:
+                classification = classification[:-1]
+
             return {
                 "title": title,
                 "slug_value": slug_value,
                 "status": (row.get("status") or "").strip() or "active",
                 "description": row.get("description", ""),
                 "usage": row.get("usage", ""),
-                "classification": (row.get("classification") or "laboratory").lower(),
+                "classification": classification,
                 "kind": row.get("kind", "service_request"),
                 "category": category,
                 "code": code,
