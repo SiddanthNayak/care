@@ -250,8 +250,6 @@ RESOURCE_TYPE_PREFIXES = {
     "activity_definition": "ad",
     "charge_item_definition": "ci",
     "product_knowledge": "pk",
-    "specimen_definition": "sp",
-    "observation_definition": "ob",
 }
 
 
